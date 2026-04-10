@@ -1,0 +1,66 @@
+﻿@model ADHD_Software_Engineering.Models.TaskItem
+
+@{
+    ViewData["Title"] = "Create Task";
+}
+
+<div class="container">
+    <h1 class="page-title">Create Task</h1>
+
+    <section class="create-task-layout">
+        <div class="form-card">
+            <h3>Task Details</h3>
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    <label asp-for="Title">Task Title:</label>
+                    <input asp-for="Title" class="form-input" placeholder="Enter Task Title" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description">Description:</label>
+                    <textarea asp-for="Description" class="form-textarea" rows="6" placeholder="Enter task description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DueDate">Due Date:</label>
+                    <input asp-for="DueDate" class="form-input" type="date" />
+                </div>
+
+                <div class="form-card">
+                    <h3>Subtasks</h3>
+
+                    <div class="form-group">
+                        <label for="subtask1">Subtask 1:</label>
+                        <input type="text" id="subtask1" name="subtask1" class="form-input" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subtask2">Subtask 2:</label>
+                        <input type="text" id="subtask2" name="subtask2" class="form-input" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subtask3">Subtask 3:</label>
+                        <input type="text" id="subtask3" name="subtask3" class="form-input" />
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Save Task</button>
+                        <a asp-controller="Task" asp-action="Index" class="cancel-btn action-link">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

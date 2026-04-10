@@ -1,0 +1,55 @@
+﻿@model List<ADHD_Software_Engineering.Models.TaskItem>
+@{
+    ViewData["Title"] = "Task List";
+}
+<div class="container">
+    <h1 class="page-title">Task List</h1>
+
+    <section class="card task-page-card">
+        <div class="table-section">
+            <h2 class="section-title">Task List</h2>
+
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Subtasks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in Model)
+                    {
+                        <tr>
+                            <td>@task.Title</td>
+                            <td>@(task.DueDate?.ToString("MMM dd") ?? "N/A")</td>
+                            <td>@task.Status</td>
+                            <td>
+                                @if (task.Subtasks.Any())
+                                {
+                                    <ul>
+                                        @foreach (var subtask in task.Subtasks)
+                                        {
+                                            <li>@subtask.Title</li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <span>No subtasks</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="center">
+            <a asp-controller="Task" asp-action="Create" class="btn-primary">+ Add Task</a>
+        </div>
+    </section>
+</div>
+
+
