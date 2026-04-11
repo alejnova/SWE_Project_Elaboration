@@ -1,0 +1,281 @@
+﻿@model ADHD_Software_Engineering.Models.TimerViewModel
+@{
+    ViewData["Title"] = "Focus Timer";
+}
+
+<style>
+    .scroll-picker {
+        height: 150px;
+        width: 70px;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        scrollbar-width: none;
+    }
+
+        .scroll-picker::-webkit-scrollbar {
+            display: none;
+        }
+
+    .picker-item {
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        scroll-snap-align: center;
+        font-size: 1.4rem;
+        color: #aaa;
+        cursor: pointer;
+        transition: color 0.2s, font-weight 0.2s;
+    }
+
+        .picker-item.selected {
+            color: #000;
+            font-weight: bold;
+        }
+
+    .preset-btn.active {
+        background-color: #6c757d;
+        color: #fff;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Focus Timer</h2>
+    <div class="card p-4 shadow-sm">
+
+        <div id="timerDisplay" class="display-4 text-center mb-2">00:00:00</div>
+
+        <div class="text-center mb-1 text-muted" id="alarmLabel" style="font-size:0.95rem; min-height:1.4rem;"></div>
+
+        <div class="text-center mb-4">
+            <strong>Status:</strong>
+            <span id="statusText">Ready</span>
+        </div>
+
+        <!-- PICKER VIEW -->
+        <div id="pickerView">
+            <div class="d-flex justify-content-center gap-4 mb-4">
+                <div class="text-center">
+                    <div class="text-muted mb-1"><strong>Hours</strong></div>
+                    <div class="scroll-picker" id="hourPicker"></div>
+                </div>
+                <div class="text-center">
+                    <div class="text-muted mb-1"><strong>Minutes</strong></div>
+                    <div class="scroll-picker" id="minutePicker"></div>
+                </div>
+                <div class="text-center">
+                    <div class="text-muted mb-1"><strong>Seconds</strong></div>
+                    <div class="scroll-picker" id="secondPicker"></div>
+                </div>
+            </div>
+
+            <!-- Presets -->
+            <div class="d-flex justify-content-center gap-3 mb-4">
+                <button class="btn btn-outline-secondary preset-btn" onclick="applyPreset(25, this)">25 min</button>
+                <button class="btn btn-outline-secondary preset-btn" onclick="applyPreset(45, this)">45 min</button>
+                <button class="btn btn-outline-secondary preset-btn" onclick="applyPreset(60, this)">60 min</button>
+            </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="d-flex justify-content-center gap-3 mt-2" id="actionButtons">
+            <button 
+                class="btn btn-danger px-5" 
+                id="deleteBtn" 
+                onclick="deleteTimer()" 
+                style="display:none;">
+                Delete
+            </button>
+
+            <button 
+                class="btn btn-success px-5" 
+                id="mainBtn" 
+                onclick="handleMain()">
+                Start
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>let remainingSeconds = 0;
+    let totalSeconds = 0;
+    let interval = null;
+    let isPaused = false;
+    let isRunning = false;
+
+    const timerDisplay = document.getElementById('timerDisplay');
+    const statusText = document.getElementById('statusText');
+    const alarmLabel = document.getElementById('alarmLabel');
+    const mainBtn = document.getElementById('mainBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const pickerView = document.getElementById('pickerView');
+
+    function buildPicker(el, max) {
+        el.appendChild(makeItem(''));
+        for (let i = 0; i <= max; i++) {
+            const div = makeItem(String(i).padStart(2, '0'));
+            div.dataset.value = i;
+            el.appendChild(div);
+        }
+        el.appendChild(makeItem(''));
+        el.scrollTop = 0;
+        el.addEventListener('scroll', () => highlightSelected(el));
+        highlightSelected(el);
+    }
+
+    function makeItem(text) {
+        const div = document.createElement('div');
+        div.className = 'picker-item';
+        div.textContent = text;
+        return div;
+    }
+
+    function highlightSelected(el) {
+        const centerIndex = Math.round(el.scrollTop / 50);
+        el.querySelectorAll('.picker-item').forEach((item, i) => {
+            item.classList.toggle('selected', i === centerIndex + 1);
+        });
+    }
+
+    function getPickerValue(el) {
+        return Math.round(el.scrollTop / 50);
+    }
+
+    function setPickerValue(el, value) {
+        el.scrollTop = value * 50;
+        highlightSelected(el);
+    }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function updateDisplay() {
+        const h = Math.floor(remainingSeconds / 3600);
+        const m = Math.floor((remainingSeconds % 3600) / 60);
+        const s = remainingSeconds % 60;
+        timerDisplay.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+
+    function updateAlarmLabel() {
+        if (!isRunning || isPaused) {
+            alarmLabel.textContent = '';
+            return;
+        }
+        const now = new Date();
+        now.setSeconds(now.getSeconds() + remainingSeconds);
+        let h = now.getHours();
+        const min = pad(now.getMinutes());
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        alarmLabel.textContent = '🔔 Ends at ' + h + ':' + min + ' ' + ampm;
+    }
+
+    function applyPreset(mins, el) {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        if (mins === 60) {
+            setPickerValue(document.getElementById('hourPicker'), 1);
+            setPickerValue(document.getElementById('minutePicker'), 0);
+        } else {
+            setPickerValue(document.getElementById('hourPicker'), 0);
+            setPickerValue(document.getElementById('minutePicker'), mins);
+        }
+        setPickerValue(document.getElementById('secondPicker'), 0);
+    }
+
+    function handleMain() {
+        if (!isRunning && !isPaused) {
+            startTimer();
+        } else if (isRunning && !isPaused) {
+            pauseTimer();
+        } else if (isPaused) {
+            resumeTimer();
+        }
+    }
+
+    function startTimer() {
+        const h = getPickerValue(document.getElementById('hourPicker'));
+        const m = getPickerValue(document.getElementById('minutePicker'));
+        const s = getPickerValue(document.getElementById('secondPicker'));
+        totalSeconds = h * 3600 + m * 60 + s;
+
+        if (totalSeconds === 0) {
+            alert('Please select a time greater than 0.');
+            return;
+        }
+
+        remainingSeconds = totalSeconds;
+        isRunning = true;
+        isPaused = false;
+        statusText.textContent = 'Running';
+        pickerView.style.display = 'none';
+        deleteBtn.style.display = 'inline-block';
+        mainBtn.textContent = 'Pause';
+        mainBtn.className = 'btn btn-warning px-5';
+        updateDisplay();
+        updateAlarmLabel();
+        startCountdown();
+    }
+
+    function startCountdown() {
+        if (interval) clearInterval(interval);
+        interval = setInterval(() => {
+            if (isPaused) return;
+            if (remainingSeconds > 0) {
+                remainingSeconds--;
+                updateDisplay();
+                updateAlarmLabel();
+            } else {
+                clearInterval(interval);
+                interval = null;
+                isRunning = false;
+                statusText.textContent = 'Completed';
+                alarmLabel.textContent = '';
+                deleteBtn.style.display = 'none';
+                mainBtn.textContent = 'Start';
+                mainBtn.className = 'btn btn-success px-5';
+                pickerView.style.display = 'block';
+                alert('Focus session completed!');
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        isPaused = true;
+        isRunning = false;
+        statusText.textContent = 'Paused';
+        mainBtn.textContent = 'Resume';
+        mainBtn.className = 'btn btn-success px-5';
+        alarmLabel.textContent = '';
+    }
+
+    function resumeTimer() {
+        isPaused = false;
+        isRunning = true;
+        statusText.textContent = 'Running';
+        mainBtn.textContent = 'Pause';
+        mainBtn.className = 'btn btn-warning px-5';
+        updateAlarmLabel();
+        startCountdown();
+    }
+
+    function deleteTimer() {
+        clearInterval(interval);
+        interval = null;
+        isRunning = false;
+        isPaused = false;
+        remainingSeconds = 0;
+        statusText.textContent = 'Ready';
+        timerDisplay.textContent = '00:00:00';
+        alarmLabel.textContent = '';
+        mainBtn.textContent = 'Start';
+        mainBtn.className = 'btn btn-success px-5';
+        deleteBtn.style.display = 'none';
+        pickerView.style.display = 'block';
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    buildPicker(document.getElementById('hourPicker'), 23);
+    buildPicker(document.getElementById('minutePicker'), 59);
+    buildPicker(document.getElementById('secondPicker'), 59);</script>
