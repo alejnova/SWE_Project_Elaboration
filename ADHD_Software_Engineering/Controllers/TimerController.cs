@@ -41,7 +41,20 @@ namespace ADHD_Software_Engineering.Controllers
         [HttpPost]
         public IActionResult LogDistraction(TimerViewModel model)
         {
-           // todo: implement timer pause logic here if needed
+           if (!string.IsNullOrWhiteSpace(model.DistractionNote))
+           {
+              model.Distractions.Add(new Distraction
+              {
+                    Note = model.DistractionNote,
+                    loggedAt = DateTime.Now
+              });
+              model.DistractionNote = string.Empty; // Clear the input after logging
+           }
+
+            model.IsRunning = false;
+            model.Status = "Paused due to distraction";
+
+            return View("Index", model);
         }
     }
 }
