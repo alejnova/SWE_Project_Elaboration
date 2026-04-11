@@ -37,5 +37,11 @@ namespace ADHD_Software_Engineering.Controllers
             model.RemainingSeconds = model.Duration * 60;
             return View("Index", model);
         }
+
+        [HttpPost]
+        public IActionResult LogDistraction(TimerViewModel model)
+        {
+           // todo: implement timer pause logic here if needed
+        }
     }
 }
