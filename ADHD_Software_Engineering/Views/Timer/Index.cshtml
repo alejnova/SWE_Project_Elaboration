@@ -211,6 +211,7 @@
     }
 
     function startTimer() {
+        requestNotificationPermission();
         const h = getPickerValue(document.getElementById('hourPicker'));
         const m = getPickerValue(document.getElementById('minutePicker'));
         const s = getPickerValue(document.getElementById('secondPicker'));
@@ -252,7 +253,7 @@
                 mainBtn.textContent = 'Start';
                 mainBtn.className = 'btn btn-success px-5';
                 pickerView.style.display = 'block';
-                alert('Focus session completed!');
+                sendBreakReminder();
             }
         }, 1000);
     }
@@ -317,6 +318,23 @@
 
     function hideDistractionSection() {
         document.getElementById('distractionSection').style.display = 'none';
+    }
+
+    function requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }
+
+    function sendBreakReminder() {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Focus session complete!', {
+                body: 'Great work — time to take a break.',
+                icon: '/favicon.ico'
+            });
+        } else {
+            alert('Focus session completed! Time to take a break.');
+        }
     }
 
     buildPicker(document.getElementById('hourPicker'), 23);
