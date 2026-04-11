@@ -10,8 +10,10 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
   <ItemGroup>
     <None Remove="Views\Task\" />
+    <None Remove="Views\Timer\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Task\" />
+    <Folder Include="Views\Timer\" />
   </ItemGroup>
 </Project>
