@@ -99,6 +99,22 @@
     </div>
 </div>
 
+<!-- for distractions logging -->
+<div id="distractionSection" class="mt-4" style="display:none;">
+    <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Log a distraction</h5>
+        <div class="d-flex gap-2 mb-3">
+            <input 
+                type="text" 
+                id="distractionInput" 
+                class="form-control" 
+                placeholder="What distracted you? e.g. checked phone" />
+            <button class="btn btn-outline-danger" onclick="logDistraction()">Log</button>
+        </div>
+        <ul class="list-group" id="distractionList"></ul>
+    </div>
+</div>
+
 <script>let remainingSeconds = 0;
     let totalSeconds = 0;
     let interval = null;
@@ -248,6 +264,7 @@
         mainBtn.textContent = 'Resume';
         mainBtn.className = 'btn btn-success px-5';
         alarmLabel.textContent = '';
+        showDistractionSection(); // Show distraction logging when paused - Ana
     }
 
     function resumeTimer() {
@@ -258,6 +275,7 @@
         mainBtn.className = 'btn btn-warning px-5';
         updateAlarmLabel();
         startCountdown();
+        hideDistractionSection(); // Hide distraction logging when resumed - Ana
     }
 
     function deleteTimer() {
@@ -274,6 +292,31 @@
         deleteBtn.style.display = 'none';
         pickerView.style.display = 'block';
         document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        hideDistractionSection(); // Hide distraction logging when timer is deleted - Ana
+    }
+
+    function logDistraction() {
+        const input = document.getElementById('distractionInput');
+        const note = input.value.trim();
+        if (!note) return;
+
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+        li.innerHTML = `<span>${note}</span><small class="text-muted">${timeStr}</small>`;
+        document.getElementById('distractionList').appendChild(li);
+
+        input.value = '';
+    }
+
+    function showDistractionSection() {
+        document.getElementById('distractionSection').style.display = 'block';
+    }
+
+    function hideDistractionSection() {
+        document.getElementById('distractionSection').style.display = 'none';
     }
 
     buildPicker(document.getElementById('hourPicker'), 23);
