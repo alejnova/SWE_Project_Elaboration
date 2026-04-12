@@ -1,0 +1,227 @@
+@{
+    ViewData["Title"] = "Focus Report";
+}
+
+<style> 
+    .streak-card {
+        background: linear-gradient(135deg, #6c63ff, #a78bfa);
+        border-radius: 16px;
+        padding: 2rem;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    .streak-count {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1;
+    }
+    .streak-unit { font-size: 1rem; opacity: 0.85; margin: 0; }
+    .streak-greeting { font-size: 1rem; opacity: 0.85; margin-bottom: 0.5rem; }
+    .streak-msg { font-size: 0.875rem; opacity: 0.75; margin-top: 0.5rem; max-width: 280px; }
+    .streak-icon-inner {
+        width: 80px; height: 80px; border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem;
+    }
+    .section-label {
+        font-size: 0.75rem; text-transform: uppercase;
+        letter-spacing: 0.1em; color: #6b7280;
+        font-weight: 600; margin-bottom: 0.5rem;
+    }
+    .progress-section {
+        background: white; border: 1px solid #e5e7eb;
+        border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+    }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .progress-title { font-weight: 500; font-size: 0.9rem; }
+    .progress-note { font-size: 0.8rem; color: #6b7280; }
+    .progress-track { height: 10px; background: #f3f4f6; border-radius: 99px; overflow: hidden; }
+    .progress-fill {
+        height: 100%; background: linear-gradient(90deg, #6c63ff, #a78bfa);
+        border-radius: 99px; transition: width 0.6s ease;
+    }
+    .stats-panel, .chart-panel {
+        background: white; border: 1px solid #e5e7eb;
+        border-radius: 12px; padding: 1.25rem 1.5rem; height: 100%;
+    }
+    .panel-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 1rem; color: #111827; }
+    .stat-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.875rem;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { color: #6b7280; }
+    .stat-val { font-weight: 600; color: #111827; }
+    .stat-val.good { color: #059669; }
+    .stat-val.miss { color: #d97706; }
+    .bar-chart {
+        display: flex; align-items: flex-end; gap: 8px;
+        height: 120px; padding-top: 1rem;
+    }
+    .bar-col {
+        display: flex; flex-direction: column; align-items: center;
+        flex: 1; height: 100%; justify-content: flex-end;
+    }
+    .bar { width: 100%; background: #6c63ff; border-radius: 4px 4px 0 0; transition: height 0.4s ease; min-height: 4px; }
+    .bar-label { font-size: 0.7rem; color: #9ca3af; margin-top: 4px; }
+    .bar-val { font-size: 0.7rem; color: #6b7280; margin-bottom: 2px; }
+    .no-data { color: #9ca3af; font-size: 0.85rem; text-align: center; padding: 2rem 0; }
+</style>
+
+<div class="mt-4">
+
+    <p class="section-label">Current streak</p>
+    <div class="streak-card">
+        <div class="streak-left">
+            <p class="streak-greeting">Keep it up!</p>
+            <p class="streak-count" id="streakCount">0</p>
+            <p class="streak-unit">Day Streak</p>
+            <p class="streak-msg" id="streakMsg">Complete a focus session today to start your streak.</p>
+        </div>
+        <div class="streak-icon">
+            <div class="streak-icon-inner">🔥</div>
+        </div>
+    </div>
+
+    <p class="section-label">Progress to next reward</p>
+    <div class="progress-section">
+        <div class="progress-header">
+            <span class="progress-title" id="rewardTitle">Streak Progress</span>
+            <span class="progress-note" id="rewardNote">0 / 5 days until unlock</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-5">
+            <p class="section-label">Summary stats</p>
+            <div class="stats-panel">
+                <p class="panel-title">All sessions</p>
+                <div class="stat-row">
+                    <span class="stat-label">Sessions completed</span>
+                    <span class="stat-val good" id="totalSessions">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total focus time</span>
+                    <span class="stat-val" id="totalTime">0 min</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total distractions logged</span>
+                    <span class="stat-val miss" id="totalDistractions">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Avg distractions / session</span>
+                    <span class="stat-val" id="avgDistractions">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <p class="section-label">Sessions — last 7 days</p>
+            <div class="chart-panel">
+                <p class="panel-title">Daily session count</p>
+                <div class="bar-chart" id="barChart">
+                    <p class="no-data w-100">No sessions recorded yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function getSessions() {
+        try { return JSON.parse(localStorage.getItem('focusSessions') || '[]'); }
+        catch { return []; }
+    }
+
+    function getStreak() {
+        return parseInt(localStorage.getItem('focusStreak') || '0');
+    }
+
+    function dayKey(date) {
+        const d = new Date(date);
+        return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+    }
+
+    function formatMinutes(secs) {
+        const m = Math.round(secs / 60);
+        return m >= 60 ? Math.floor(m/60) + 'h ' + (m%60) + 'm' : m + ' min';
+    }
+
+    function renderStreak() {
+        const streak = getStreak();
+        document.getElementById('streakCount').textContent = streak;
+        if (streak === 0) {
+            document.getElementById('streakMsg').innerHTML = 'Complete a focus session today to start your streak.';
+        } else {
+            document.getElementById('streakMsg').innerHTML =
+                'You\'ve completed sessions for <strong>' + streak + ' day' +
+                (streak !== 1 ? 's' : '') + ' straight.</strong> Keep going!';
+        }
+        const milestone = 5;
+        const daysInto = streak % milestone;
+        const pct = Math.round((daysInto / milestone) * 100);
+        const daysLeft = milestone - daysInto;
+        const nextTarget = Math.ceil((streak + 1) / milestone) * milestone;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('rewardTitle').textContent = 'Streak Progress — Day ' + nextTarget + ' Reward';
+        document.getElementById('rewardNote').textContent = daysLeft + ' / ' + milestone + ' days until unlock';
+    }
+
+    function renderStats() {
+        const sessions = getSessions();
+        const total = sessions.length;
+        const totalSecs = sessions.reduce((a, s) => a + (s.duration || 0), 0);
+        const totalDist = sessions.reduce((a, s) => a + (s.distractions || 0), 0);
+        const avg = total > 0 ? (totalDist / total).toFixed(1) : 0;
+        document.getElementById('totalSessions').textContent = total;
+        document.getElementById('totalTime').textContent = formatMinutes(totalSecs);
+        document.getElementById('totalDistractions').textContent = totalDist;
+        document.getElementById('avgDistractions').textContent = avg;
+    }
+
+    function renderChart() {
+        const sessions = getSessions();
+        const chart = document.getElementById('barChart');
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            days.push({ key: dayKey(d), label: d.toLocaleDateString('en-US', { weekday: 'short' }), count: 0 });
+        }
+        sessions.forEach(s => {
+            const k = dayKey(s.completedAt);
+            const day = days.find(d => d.key === k);
+            if (day) day.count++;
+        });
+        const max = Math.max(...days.map(d => d.count), 1);
+        if (days.every(d => d.count === 0)) {
+            chart.innerHTML = '<p class="no-data w-100">No sessions recorded yet.</p>';
+            return;
+        }
+        chart.innerHTML = '';
+        days.forEach(day => {
+            const heightPct = Math.round((day.count / max) * 100);
+            const col = document.createElement('div');
+            col.className = 'bar-col';
+            col.innerHTML =
+                '<span class="bar-val">' + (day.count || '') + '</span>' +
+                '<div class="bar" style="height:' + heightPct + '%"></div>' +
+                '<span class="bar-label">' + day.label + '</span>';
+            chart.appendChild(col);
+        });
+    }
+
+    renderStreak();
+    renderStats();
+    renderChart();
+</script>
+}

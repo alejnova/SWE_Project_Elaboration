@@ -253,6 +253,7 @@
                 mainBtn.textContent = 'Start';
                 mainBtn.className = 'btn btn-success px-5';
                 pickerView.style.display = 'block';
+                saveCompletedSession(totalSeconds);
                 sendBreakReminder();
             }
         }, 1000);
@@ -334,6 +335,54 @@
             });
         } else {
             alert('Focus session completed! Time to take a break.');
+        }
+    }
+
+    
+    function saveCompletedSession(durationSeconds) {
+        const sessions = JSON.parse(localStorage.getItem('focusSessions') || '[]');
+        const distractionItems = document.getElementById('distractionList');
+        const distractionCount = distractionItems ? distractionItems.children.length : 0;
+    
+        sessions.push({
+            completedAt: new Date().toISOString(),
+            duration: durationSeconds,
+            distractions: distractionCount
+        });
+    
+        localStorage.setItem('focusSessions', JSON.stringify(sessions));
+        updateStreak();
+    }
+ 
+    function updateStreak() {
+        const sessions = JSON.parse(localStorage.getItem('focusSessions') || '[]');
+        if (sessions.length === 0) return;
+    
+        const today = new Date().toDateString();
+        const lastSession = new Date(sessions[sessions.length - 1].completedAt).toDateString();
+    
+        if (lastSession !== today) return; // session not from today, don't update yet
+    
+        // check if yesterday also had a session
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+    
+        const hadYesterday = sessions.some(s =>
+            new Date(s.completedAt).toDateString() === yesterdayStr
+        );
+    
+        const currentStreak = parseInt(localStorage.getItem('focusStreak') || '0');
+    
+        // count sessions today to avoid double-incrementing
+        const todaySessions = sessions.filter(s =>
+            new Date(s.completedAt).toDateString() === today
+        );
+    
+        if (todaySessions.length === 1) {
+            // first session of today
+            const newStreak = hadYesterday ? currentStreak + 1 : 1;
+            localStorage.setItem('focusStreak', newStreak);
         }
     }
 
