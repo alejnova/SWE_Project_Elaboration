@@ -41,6 +41,11 @@ namespace ADHD_Software_Engineering.Controllers
             return View(new TaskItem());
         }
 
+        public IActionResult Profile()
+        {
+            return View();
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(TaskItem task, string? subtask1, string? subtask2, string? subtask3)
