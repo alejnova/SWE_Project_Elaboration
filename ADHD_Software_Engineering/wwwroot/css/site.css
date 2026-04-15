@@ -105,9 +105,10 @@ body {
     display: inline-block;
 }
 
-    .btn-primary:hover {
-        background: #555;
-    }
+.btn-primary:hover {
+    background: #555;
+
+}
 
 .secondary-btn {
     margin-top: 0.5rem;
@@ -145,11 +146,11 @@ body {
     margin-bottom: 1.25rem;
 }
 
-    .form-group label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
 
 .form-input,
 .form-select,
@@ -215,6 +216,8 @@ body {
     background: #1f4e79;
     color: white;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .delete-btn {

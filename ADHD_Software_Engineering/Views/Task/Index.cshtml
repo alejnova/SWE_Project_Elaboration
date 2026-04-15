@@ -1,7 +1,9 @@
 ﻿@model List<ADHD_Software_Engineering.Models.TaskItem>
+
 @{
     ViewData["Title"] = "Task List";
 }
+
 <div class="container">
     <h1 class="page-title">Task List</h1>
 
@@ -16,6 +18,7 @@
                         <th>Due Date</th>
                         <th>Status</th>
                         <th>Subtasks</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,6 +43,19 @@
                                     <span>No subtasks</span>
                                 }
                             </td>
+                            <td class="actions-cell">
+                                <a asp-controller="Task" asp-action="Edit" asp-route-id="@task.Id" class="task-action-btn">
+                                    Edit
+                                </a>
+
+                                <form asp-controller="Task" asp-action="Delete" asp-route-id="@task.Id" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="task-action-btn delete-btn"
+                                            onclick="return confirm('Delete this task?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -51,5 +67,3 @@
         </div>
     </section>
 </div>
-
-

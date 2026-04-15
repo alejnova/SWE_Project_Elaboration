@@ -46,6 +46,7 @@ namespace ADHD_Software_Engineering.Controllers
             return View();
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(TaskItem task, string? subtask1, string? subtask2, string? subtask3)
@@ -66,6 +67,57 @@ namespace ADHD_Software_Engineering.Controllers
             task.Status = "Pending";
 
             Tasks.Add(task);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var task = Tasks.FirstOrDefault(t => t.Id == id);
+            if (task == null)
+                return NotFound();
+
+            return View(task);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(TaskItem updatedTask, string? subtask1, string? subtask2, string? subtask3)
+        {
+            var existingTask = Tasks.FirstOrDefault(t => t.Id == updatedTask.Id);
+            if (existingTask == null)
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return View(updatedTask);
+
+            existingTask.Title = updatedTask.Title;
+            existingTask.Description = updatedTask.Description;
+            existingTask.DueDate = updatedTask.DueDate;
+            existingTask.Status = updatedTask.Status;
+
+            existingTask.Subtasks = new List<SubtaskItem>();
+
+            if (!string.IsNullOrWhiteSpace(subtask1))
+                existingTask.Subtasks.Add(new SubtaskItem { Title = subtask1 });
+
+            if (!string.IsNullOrWhiteSpace(subtask2))
+                existingTask.Subtasks.Add(new SubtaskItem { Title = subtask2 });
+
+            if (!string.IsNullOrWhiteSpace(subtask3))
+                existingTask.Subtasks.Add(new SubtaskItem { Title = subtask3 });
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id)
+        {
+            var task = Tasks.FirstOrDefault(t => t.Id == id);
+            if (task != null)
+                Tasks.Remove(task);
 
             return RedirectToAction(nameof(Index));
         }
